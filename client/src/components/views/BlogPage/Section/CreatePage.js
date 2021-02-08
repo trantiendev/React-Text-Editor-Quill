@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import QuillEditor from '../../../editor/QuillEditor'
 const { Title } = Typography
 
-function CreatePage() {
+function CreatePage(props) {
   const user = useSelector(state => state.user)
 
   const [content, setContent] = useState('')
@@ -20,7 +20,7 @@ function CreatePage() {
   }
   
   const onSubmit = event => {
-    event.preventDefault();
+    event.preventDefault()
     setContent('')
 
     if (user.userData && !user.userData.isAuth) {
@@ -28,16 +28,22 @@ function CreatePage() {
     }
 
     const variables = {
-      content,
-      userId: user.userData._id
+      content: content,
+      writer: user.userData._id
     }
 
     axios.post('/api/blog/createPost', variables)
       .then(response => {
         console.log(response)
+        if (response.data.success) {
+          message.success('Post Created!')
+
+          setTimeout(() => {
+            props.history.push('/blog')
+          }, 2000)
+        };
       });
   }
-
 
   return (
     <div>

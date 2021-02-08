@@ -29,16 +29,9 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).single("file")
 
-router.post("/uploadfiles", (req, res) => {
-  upload(req, res, err => {
-    if (err) return res.json({ success: false, err })
-      
-    return res.json({ success: true, url: res.req.file.path, fileName: res.req.file.filename })
-  })
-})
-
-router.post("/createPost", (req, res) => {
+router.post('/createPost', (req, res) => {
   const blog = new Blog(req.body);
+  // let blog = new Blog({ content: req.body.content, writer: req.body.userID });
 
   blog.save((err, postInfo) => {
     if (err) return res.json({ success: false, err })
@@ -48,5 +41,32 @@ router.post("/createPost", (req, res) => {
     })
   })
 })
+
+router.post("/uploadfiles", (req, res) => {
+  upload(req, res, err => {
+    if (err) return res.json({ success: false, err })
+      
+    return res.json({ success: true, url: res.req.file.path, fileName: res.req.file.filename })
+  })
+})
+
+router.get("/getBlogs", (req, res) => {
+  Blog.find()
+    .populate("writer")
+    .exec((err, blogs) => {
+      if (err) return res.status(400).send(err);
+      res.status(200).json({ success: true, blogs });
+    });
+});
+
+router.post("/getPost", (req, res) => {
+  console.log(req.body)
+  Blog.findOne({ "_id": req.body.postId })
+    .populate('writer')
+    .exec((err, post) => {
+      if (err) return res.status(400).send(err);
+      res.status(200).json({ success: true, post })
+    })
+});
 
 module.exports = router;
